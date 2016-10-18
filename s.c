@@ -29,14 +29,14 @@ s* s_new(s *x, const void *p) {
   size_t len = strlen(p) + 1;
   if (len > 16) {
     x->capacity = ilog2(len) + 1;
-    x->size = len;
+    x->size = len - 1;
     x->is_on_heap = 1;
     x->ptr = malloc((size_t)1 << x->capacity);
     memcpy(x->ptr, p, len);
   }
   else {
     memcpy(x->data, p, len);
-    x->space_left = 15 - len;
+    x->space_left = 15 - (len-1);
   }
   return x;
 }

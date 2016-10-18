@@ -12,8 +12,8 @@ int main() {
   s_newlen(&s1, "hello world hello world", 20);
   printf("<%s> <%zu> <%zu>\n", s_data(&s1), s_size(&s1), s_capacity(&s1));
   s_free(&s1);
-  s_new(&s1, "foo bar baz");
-  printf("%s\n", s_data(&s1));
+  s_new(&s1, "01234567890123456");
+  printf("%s %zu\n", s_data(&s1), s_size(&s1));
   s_free(&s1);
   s_new(&s1, "foo bar baz bat 1234567890");
   printf("%s\n", s_data(&s1));
