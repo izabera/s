@@ -7,7 +7,11 @@ static inline int ilog2(int);
 static inline int ilog10(int);
 
 
+// this relies on malloc returning 16 bytes aligned addresses
+// if that's not the case, use
+// #define malloc(x) aligned_alloc(16, x)
 
+#if 0
 s s_new(const void *p) {
   s s = { .size = strlen(p) };
   if (s.size+1 > sizeof(s.buf)) {
@@ -18,31 +22,28 @@ s s_new(const void *p) {
   memcpy(s.data, p, s.size+1);
   return s;
 }
+#endif
 
-s s_newlen(const void *p, size_t len) {
-  s s = { .size = len };
-  if (s.size > sizeof(s.buf)) {
-    s.capacity = nextpow2(s.size);
-    s.data = malloc(s.capacity);
+// done
+void s_newlen(s *x, const void *p, size_t len) {
+  *x = (s) { 0 };
+  if (len > 15) {
+    x->capacity = nextpow2(len);
+    x->size = len;
+    x->is_on_heap = 1;
+    x->ptr = malloc(x->capacity);
+    memcpy(x->ptr, p, len);
   }
-  else s.data = s.buf;
-  memcpy(s.data, p, s.size);
-  return s;
+  else {
+    memcpy(&x->data, p, len);
+    x->space_left = 15 - len;
+  }
 }
 
-size_t nextpow2(size_t num) {
-  // oh gawd it's so portable
-  return (size_t)1 << (CHAR_BIT*sizeof(size_t)-__builtin_clz(num));
-}
+// done
+size_t nextpow2(size_t num) { return (size_t)1 << (16-__builtin_clz(num)); }
 
-s s_empty(void) {
-  s s_null = { .data = s_null.buf, .size = 0 };
-  return s_null;
-}
-
-s s_dup(s old) { return s_newlen(old.data, old.size); }
-void s_free(s s) { if (s.size > sizeof(s.buf)) free(s.data); }
-
+#if 0
 s s_catlen(s s, const void *p, size_t len) {
   if (s.size + len > sizeof(s.buf) || s.size + len > s.capacity) {
     // can't overwrite capacity and can't realloc!
@@ -80,11 +81,12 @@ s sdscatprintf(s s, const char *fmt, ...) {
 
 
 
-static inline int ilog2(int n) { return 64 - __builtin_clz(n) - 1; }
+#endif
+static inline int ilog2(int n) { return 32 - __builtin_clz(n) - 1; }
 static inline int ilog10(int n) {
   // https://graphics.stanford.edu/%7Eseander/bithacks.html#IntegerLog10
   // works in gcc/clang/probably icc
-  int temp = (CHAR_BIT*sizeof(int) - __builtin_clz(n | 1)) * 1233 >> 12;
+  int temp = (32 - __builtin_clz(n | 1)) * 1233 >> 12;
   int pow10[] = {
     0, 10, 100, 1000,
     10000, 100000, 1000000,
@@ -93,13 +95,12 @@ static inline int ilog10(int n) {
   return temp - (n < pow10[temp]) + 1;
 }
 
-
-s s_itos(int n) {
+void s_itos(s *x, int n) {
   int neg = n < 0;
   if (neg) n = -n;
-  s s = { .data = s.buf + ilog10(n) + neg };
-  if (neg) s.buf[0] = '-';
-  *s.data = 0;
+  *x = (s) { 0 };
+  char *ptr = x->data + ilog10(n) + neg;
+  if (neg) x->data[0] = '-';
 
   const char *digits =
     "00" "01" "02" "03" "04" "05" "06" "07" "08" "09"
@@ -116,15 +117,14 @@ s s_itos(int n) {
   while (n >= 100) {
     int pos = n % 100;
     n /= 100;
-    *--s.data = digits[2*pos+1];
-    *--s.data = digits[2*pos  ];
+    *--ptr = digits[2*pos+1];
+    *--ptr = digits[2*pos  ];
   }
   if (n >= 10) {
-    *--s.data = digits[2*n+1];
-    *--s.data = digits[2*n  ];
+    *--ptr = digits[2*n+1];
+    *--ptr = digits[2*n  ];
   }
   else
-    *--s.data = '0' + n;
-  s.size = strlen(s.data);
-  return s;
+    *--ptr = '0' + n;
+  x->space_left = 15 - neg - ilog10(n);
 }
