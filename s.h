@@ -13,12 +13,12 @@ typedef union {
     unsigned char filler1[15],
                   // how many free bytes in this stack allocated string
                   // same idea as fbstring
-    space_left:4,
-    // if it's on heap, this is set to 1
-    is_on_heap:1,
-    flag1:1,
-    flag2:1,
-    flag3:1;
+                  space_left:4,
+                  // if it's on heap, this is set to 1
+                  is_on_heap:1,
+                  flag1:1,
+                  flag2:1,
+                  flag3:1;
   };
 
   // heap allocated

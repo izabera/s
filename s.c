@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "s.h"
 
-static inline size_t nextpow2(unsigned);
+/*static inline size_t nextpow2(unsigned);*/
 static inline int ilog2(int);
 static inline int ilog10(int);
 
@@ -41,7 +41,7 @@ s* s_new(s *x, const void *p) {
   return x;
 }
 
-size_t nextpow2(unsigned num) { return (size_t)1 << (32-__builtin_clz(num)); }
+/*size_t nextpow2(unsigned num) { return (size_t)1 << (32-__builtin_clz(num)); }*/
 
 s* s_cat(s* a, const s* b) {
   size_t sizea = s_size(a), sizeb = s_size(b);
@@ -78,7 +78,6 @@ s* s_grow(s* x, size_t len) {
 static inline int ilog2(int n) { return 32 - __builtin_clz(n) - 1; }
 static inline int ilog10(int n) {
   // https://graphics.stanford.edu/%7Eseander/bithacks.html#IntegerLog10
-  // works in gcc/clang/probably icc
   int temp = (32 - __builtin_clz(n | 1)) * 1233 >> 12;
   int pow10[] = {
     0, 10, 100, 1000,
