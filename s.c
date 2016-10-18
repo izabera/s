@@ -7,24 +7,7 @@ static inline int ilog2(int);
 static inline int ilog10(int);
 
 
-// this relies on malloc returning 16 bytes aligned addresses
-// if that's not the case, use
-// #define malloc(x) aligned_alloc(16, x)
-
-#if 0
-s s_new(const void *p) {
-  s s = { .size = strlen(p) };
-  if (s.size+1 > sizeof(s.buf)) {
-    s.capacity = nextpow2(s.size+1);
-    s.data = malloc(s.capacity);
-  }
-  else s.data = s.buf;
-  memcpy(s.data, p, s.size+1);
-  return s;
-}
-#endif
-
-void s_newlen(s *x, const void *p, size_t len) {
+s* s_newlen(s *x, const void *p, size_t len) {
   *x = (s) { 0 };
   if (len > 15) {
     x->capacity = ilog2(len) + 1;
@@ -38,6 +21,24 @@ void s_newlen(s *x, const void *p, size_t len) {
     memcpy(x->data, p, len);
     x->space_left = 15 - len;
   }
+  return x;
+}
+
+s* s_new(s *x, const void *p) {
+  *x = (s) { 0 };
+  size_t len = strlen(p) + 1;
+  if (len > 16) {
+    x->capacity = ilog2(len) + 1;
+    x->size = len;
+    x->is_on_heap = 1;
+    x->ptr = malloc((size_t)1 << x->capacity);
+    memcpy(x->ptr, p, len);
+  }
+  else {
+    memcpy(x->data, p, len);
+    x->space_left = 15 - len;
+  }
+  return x;
 }
 
 size_t nextpow2(unsigned num) { return (size_t)1 << (32-__builtin_clz(num)); }
@@ -94,7 +95,7 @@ static inline int ilog10(int n) {
   return temp - (n < pow10[temp]) + 1;
 }
 
-void s_itos(s *x, int n) {
+s* s_itos(s *x, int n) {
   int neg = n < 0;
   if (neg) n = -n;
   *x = (s) { 0 };
@@ -126,4 +127,5 @@ void s_itos(s *x, int n) {
   else
     *--ptr = '0' + n;
   x->space_left = 15 - neg - ilog10(n);
+  return x;
 }

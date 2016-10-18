@@ -41,19 +41,21 @@ an0si int s_is_on_heap(s* s) { return s->is_on_heap; }
 an0si size_t s_size(s* s) { return s_is_on_heap(s) ? s->size : 15 - s->space_left; }
 an0si char *s_data(s* s) { return s_is_on_heap(s) ? s->ptr : s->data; }
 an0si int s_empty(s* s) { return s_is_on_heap(s) ? s->size == 0 : s->space_left == 15; }
-an0si size_t s_capacity(s* s) { return s_is_on_heap(s) ? (size_t)1 << s->capacity - 1 : 15; }
+an0si size_t s_capacity(s* s) { return s_is_on_heap(s) ? ((size_t)1 << s->capacity) - 1 : 15; }
 
 // manipulation
-an0 void s_new(s*, const void *);
-an0 void s_newlen(s*, const void *, size_t);
-an0si void s_newempty(s* x) { *x = (s) { .space_left = 15 }; }
-an0si void s_dup(s* dest, s* src) { s_newlen(dest, src->data, src->size); }
+// all of these return their first argument
+an0 s* s_new(s*, const void *);
+an0 s* s_newlen(s*, const void *, size_t);
+an0si s* s_newempty(s* x) { *x = (s) { .space_left = 15 }; }
+an0si s* s_dup(s* dest, s* src) { s_newlen(dest, src->data, src->size); }
+an0 s* s_catlen(s*, const void *, size_t);
+an0 s* s_cat(s*, const void *);
+an0 s* s_cats(s*, s*);
+an0 s* s_growzero(s*, size_t);
+an0 s* s_catprintf(s*, const char *, ...);
+an0 s* s_itos(s*, int);
+
 an0si void s_free(s* s) { if (s_is_on_heap(s)) free(s_data(s)); }
-an0 void s_catlen(s*, const void *, size_t);
-an0 void s_cat(s*, const void *);
-an0 void s_cats(s*, s*);
-an0 void s_growzero(s*, size_t);
-an0 void s_catprintf(s*, const char *, ...);
-an0 void s_itos(s*, int);
 #undef an0si
 #undef an0
