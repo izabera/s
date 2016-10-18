@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "s.h"
 
-static inline size_t nextpow2(size_t);
+static inline size_t nextpow2(unsigned);
 static inline int ilog2(int);
 static inline int ilog10(int);
 
@@ -24,24 +24,23 @@ s s_new(const void *p) {
 }
 #endif
 
-// done
 void s_newlen(s *x, const void *p, size_t len) {
   *x = (s) { 0 };
   if (len > 15) {
-    x->capacity = nextpow2(len);
+    x->capacity = ilog2(len) + 1;
     x->size = len;
     x->is_on_heap = 1;
-    x->ptr = malloc(x->capacity);
+    x->ptr = malloc((size_t)1 << x->capacity);
     memcpy(x->ptr, p, len);
+    x->ptr[len] = 0;
   }
   else {
-    memcpy(&x->data, p, len);
+    memcpy(x->data, p, len);
     x->space_left = 15 - len;
   }
 }
 
-// done
-size_t nextpow2(size_t num) { return (size_t)1 << (16-__builtin_clz(num)); }
+size_t nextpow2(unsigned num) { return (size_t)1 << (32-__builtin_clz(num)); }
 
 #if 0
 s s_catlen(s s, const void *p, size_t len) {

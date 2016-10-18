@@ -39,11 +39,9 @@ typedef union {
 // query
 an0si int s_is_on_heap(s* s) { return s->is_on_heap; }
 an0si size_t s_size(s* s) { return s_is_on_heap(s) ? s->size : 15 - s->space_left; }
-an0si size_t s_length(s* s) { return s_size(s); }
 an0si char *s_data(s* s) { return s_is_on_heap(s) ? s->ptr : s->data; }
-an0si char *s_c_str(s* s) { return s_data(s); }
 an0si int s_empty(s* s) { return s_is_on_heap(s) ? s->size == 0 : s->space_left == 15; }
-an0si int s_capacity(s* s) { return s_is_on_heap(s) ? s->capacity : 15; }
+an0si size_t s_capacity(s* s) { return s_is_on_heap(s) ? (size_t)1 << s->capacity - 1 : 15; }
 
 // manipulation
 an0 void s_new(s*, const void *);
