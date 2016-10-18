@@ -25,7 +25,7 @@ s* s_newlen(s *x, const void *p, size_t len) {
 }
 
 s* s_new(s *x, const void *p) {
-  *x = (s) { 0 };
+  *x = s_literal_empty();
   size_t len = strlen(p) + 1;
   if (len > 16) {
     x->capacity = ilog2(len) + 1;
@@ -43,45 +43,38 @@ s* s_new(s *x, const void *p) {
 
 size_t nextpow2(unsigned num) { return (size_t)1 << (32-__builtin_clz(num)); }
 
-#if 0
-s s_catlen(s s, const void *p, size_t len) {
-  if (s.size + len > sizeof(s.buf) || s.size + len > s.capacity) {
-    // can't overwrite capacity and can't realloc!
-    size_t cap = nextpow2(s.size + len);
-    char *p = malloc(cap);
-    memcpy(p, s.data, s.size);
-    s.capacity = cap;
-    s.data = p;
+s* s_cat(s* a, const s* b) {
+  size_t sizea = s_size(a), sizeb = s_size(b);
+  if (sizea + sizeb > 15) {
+    if (s_capacity(a) < sizea + sizeb + 1)
+      s_grow(a, sizea + sizeb + 1);
+    memcpy(a->ptr + sizea, s_data(b), sizeb+1);
+    a->size = sizea + sizeb;
+    a->ptr[a->size] = 0;
   }
-  memcpy(s.data + s.size, p, len);
-  s.size += len;
-  return s;
-}
-
-s s_cat(s s, const void *p) { return s_catlen(s, p, strlen(p)+1); }
-s s_cats(s s1, s s2) { return s_catlen(s1, s2.data, s2.size); }
-
-s s_growzero(s s, size_t len) {
-  len++; // tell antirez that this is one confusing api
-  if (len > sizeof(s.buf) && s.capacity <= len) {
-    size_t cap = nextpow2(s.size + len);
-    char *p = malloc(cap);
-    memcpy(p, s.data, s.size);
-    s.capacity = cap;
-    s.data = p;
+  else {
+    memcpy(a->data + sizea, b->data, sizeb+1);
+    a->space_left = 15 - (sizea + sizeb);
   }
-  return s;
+  return a;
 }
 
-
-s sdscatprintf(s s, const char *fmt, ...) {
-  // stub
-  return s;
+s* s_grow(s* x, size_t len) {
+  if (len <= s_capacity(x)) return x;
+  len = ilog2(len) + 1;
+  if (s_is_on_heap(x))
+    x->ptr = realloc(x->ptr, (size_t)1 << len);
+  else {
+    char buf[16];
+    memcpy(buf, x->data, 16);
+    x->ptr = malloc((size_t)1 << len);
+    memcpy(x->ptr, buf, 16);
+  }
+  x->is_on_heap = 1;
+  x->capacity = len;
+  return x;
 }
 
-
-
-#endif
 static inline int ilog2(int n) { return 32 - __builtin_clz(n) - 1; }
 static inline int ilog10(int n) {
   // https://graphics.stanford.edu/%7Eseander/bithacks.html#IntegerLog10
@@ -99,7 +92,8 @@ s* s_itos(s *x, int n) {
   int neg = n < 0;
   if (neg) n = -n;
   *x = (s) { 0 };
-  char *ptr = x->data + ilog10(n) + neg;
+  int len = ilog10(n) + neg;
+  char *ptr = x->data + len;
   if (neg) x->data[0] = '-';
 
   const char *digits =
@@ -126,6 +120,6 @@ s* s_itos(s *x, int n) {
   }
   else
     *--ptr = '0' + n;
-  x->space_left = 15 - neg - ilog10(n);
+  x->space_left = 15 - len;
   return x;
 }
