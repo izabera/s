@@ -19,6 +19,7 @@ the 16th byte is used as a null terminator and to store some metadata.
 
 longer strings are allocated on the heap.
 the union holds a pointer to a malloced area, a size and a capacity.
+
 to fit in 16 bytes, strings are limited to 2^54-1 characters.
 
 
