@@ -7,7 +7,7 @@ static inline int ilog2(int);
 static inline int ilog10(int);
 
 
-s* s_newlen(s *x, const void *p, size_t len) {
+s *s_newlen(s *x, const void *p, size_t len) {
   *x = (s) { 0 };
   if (len > 15) {
     x->capacity = ilog2(len) + 1;
@@ -24,7 +24,7 @@ s* s_newlen(s *x, const void *p, size_t len) {
   return x;
 }
 
-s* s_new(s *x, const void *p) {
+s *s_new(s *x, const void *p) {
   *x = s_literal_empty();
   size_t len = strlen(p) + 1;
   if (len > 16) {
@@ -43,7 +43,7 @@ s* s_new(s *x, const void *p) {
 
 /*size_t nextpow2(unsigned num) { return (size_t)1 << (32-__builtin_clz(num)); }*/
 
-s* s_cat(s* a, const s* b) {
+s *s_cat(s *a, const s *b) {
   size_t sizea = s_size(a), sizeb = s_size(b);
   if (sizea + sizeb > 15) {
     if (s_capacity(a) < sizea + sizeb + 1)
@@ -59,7 +59,7 @@ s* s_cat(s* a, const s* b) {
   return a;
 }
 
-s* s_grow(s* x, size_t len) {
+s *s_grow(s *x, size_t len) {
   if (len <= s_capacity(x)) return x;
   len = ilog2(len) + 1;
   if (s_is_on_heap(x))
@@ -87,7 +87,7 @@ static inline int ilog10(int n) {
   return temp - (n < pow10[temp]) + 1;
 }
 
-s* s_itos(s *x, int n) {
+s *s_itos(s *x, int n) {
   int neg = n < 0;
   if (neg) n = -n;
   *x = (s) { 0 };

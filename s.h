@@ -43,8 +43,8 @@ an0si size_t s_capacity(const s* s) { return s_is_on_heap(s) ? ((size_t)1 << s->
 
 // manipulation
 // all of these return their first argument
-an0 s* s_new(s*, const void *);
-an0 s* s_newlen(s*, const void *, size_t);
+an0 s *s_new(s*, const void *);
+an0 s *s_newlen(s*, const void *, size_t);
 #define s_literal_empty() (s) { .space_left = 15 }
 // this leaks if the string is too long but it's very handy for short strings
 // "" causes a compile time error if x is not a string literal or too long
@@ -52,15 +52,15 @@ an0 s* s_newlen(s*, const void *, size_t);
 #define s_small_temporary(x) \
   ((struct { _Static_assert(sizeof x <= 16, "it's too big"); int dummy; }){1}, \
    s_new(&s_literal_empty(), "" x))
-an0si s* s_newempty(s* x) { *x = s_literal_empty(); return x; }
-an0si s* s_dup(s* dest, const s* src) { return s_newlen(dest, s_data(src), s_size(src)); }
-an0 s* s_cat(s*, const s*);
+an0si s *s_newempty(s* x) { *x = s_literal_empty(); return x; }
+an0si s *s_dup(s* dest, const s* src) { return s_newlen(dest, s_data(src), s_size(src)); }
+an0 s *s_cat(s*, const s*);
 // grow up to that size
-an0 s* s_grow(s*, size_t);
+an0 s *s_grow(s*, size_t);
 // from INT_MIN+1 to INT_MAX
-an0 s* s_itos(s*, int);
+an0 s *s_itos(s*, int);
 
-an0si s* s_free(s* x) { if (s_is_on_heap(x)) free(s_data(x)); return s_newempty(x); }
+an0si s *s_free(s* x) { if (s_is_on_heap(x)) free(s_data(x)); return s_newempty(x); }
 #undef an0si
 #undef an0
 
