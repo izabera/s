@@ -77,13 +77,15 @@ s *s_grow(s *x, size_t len) {
 
 static inline int ilog2(int n) { return 32 - __builtin_clz(n) - 1; }
 static inline int ilog10(int n) {
-  // https://graphics.stanford.edu/%7Eseander/bithacks.html#IntegerLog10
-  int temp = (32 - __builtin_clz(n | 1)) * 1233 >> 12;
-  int pow10[] = {
+  const int pow10[] = {
+    // note: pow[0] == 0
     0, 10, 100, 1000,
     10000, 100000, 1000000,
     10000000, 100000000, 1000000000,
   };
+  // https://graphics.stanford.edu/%7Eseander/bithacks.html#IntegerLog10
+  // https://github.com/miloyip/itoa-benchmark/blob/master/src/countdecimaldigit.h
+  int temp = (32 - __builtin_clz(n | 1)) * 1233 >> 12;
   return temp - (n < pow10[temp]) + 1;
 }
 
@@ -121,4 +123,24 @@ s *s_itos(s *x, int n) {
     *--ptr = '0' + n;
   x->space_left = 15 - len;
   return x;
+}
+
+int s_stoi(const s *x) {
+  char *ptr = s_data(x);
+  int neg = ptr[0] == '-', num = 0, len = s_size(x);
+  if (neg) ptr++, len--;
+
+  switch (len) {
+    case 10: num += 1000000000 * (ptr[len-10] - '0');
+    case  9: num +=  100000000 * (ptr[len- 9] - '0');
+    case  8: num +=   10000000 * (ptr[len- 8] - '0');
+    case  7: num +=    1000000 * (ptr[len- 7] - '0');
+    case  6: num +=     100000 * (ptr[len- 6] - '0');
+    case  5: num +=      10000 * (ptr[len- 5] - '0');
+    case  4: num +=       1000 * (ptr[len- 4] - '0');
+    case  3: num +=        100 * (ptr[len- 3] - '0');
+    case  2: num +=         10 * (ptr[len- 2] - '0');
+    case  1: num +=          1 * (ptr[len- 1] - '0');
+  }
+  return neg ? -num : num;
 }

@@ -59,6 +59,7 @@ an0 s *s_cat(s *, const s *);
 an0 s *s_grow(s *, size_t);
 // from INT_MIN+1 to INT_MAX
 an0 s *s_itos(s *, int);
+an0 int s_stoi(const s *);
 
 an0si s *s_free(s * x) { if (s_is_on_heap(x)) free(s_data(x)); return s_newempty(x); }
 #undef an0si
