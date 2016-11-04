@@ -144,3 +144,36 @@ int s_stoi(const s *x) {
   }
   return neg ? -num : num;
 }
+
+s *s_trim(s *x, const char *trimset) {
+  if (!trimset[0]) return x;
+  char *dataptr = s_data(x), *orig = dataptr;
+
+  // this is similar to strspn/strpbrk but it works on binary data
+  unsigned char mask[32] = { 0 };
+
+#define checkbit(byte) (mask[(unsigned char)byte/8] &  1 << (unsigned char)byte % 8)
+#define   setbit(byte) (mask[(unsigned char)byte/8] |= 1 << (unsigned char)byte % 8)
+  ssize_t i, slen = s_size(x), trimlen = strlen(trimset);
+
+  for (i = 0; i < trimlen; i++) setbit(trimset[i]);
+  for (i = 0; i <    slen; i++) if (!checkbit(dataptr[i])) break;
+  dataptr += i;
+  slen -= i;
+
+  memset(mask, 0, 32);
+  for (i = trimlen-1; i >= 0; i--) setbit(trimset[i]);
+  for (i =    slen-1; i >= 0; i--) if (!checkbit(dataptr[i])) break;
+  slen = i + 1;
+
+  // people reserved space to have a buffer on the heap
+  // *don't* free it!  just reuse it, don't shrink to in place if < 16 bytes
+
+  memmove(orig, dataptr, slen);
+  // don't dirty memory unless it's needed
+  if (orig[slen]) orig[slen] = 0;
+
+  if (s_is_on_heap(x)) x->size = slen;
+  else x->space_left = 15 - slen;
+  return x;
+}

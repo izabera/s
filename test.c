@@ -31,4 +31,51 @@ int main() {
   s_free(&s2);
   s_free(&s2);
   // freeing twice is not an error
+
+  s string;
+  string = *s_small_temporary("1234567890");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("123456789");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("12345678");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("1234567");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("123456");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("12345");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("1234");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("123");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("12");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("1");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-1234567890");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-123456789");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-12345678");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-1234567");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-123456");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-12345");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-1234");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-123");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-12");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+  string = *s_small_temporary("-1");
+  printf("%s %zu ->%d\n", s_data(&string), s_size(&string), s_stoi(&string));
+
+  string = *s_small_temporary("  foobarbaz  \n\n");
+  s_trim(&string, "\n ");
+  printf("%zu <%s>\n", s_size(&string), s_data(&string));
+  return 0;
 }
