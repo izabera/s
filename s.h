@@ -1,6 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 // public api
 typedef union {
@@ -15,7 +16,7 @@ typedef union {
                   // same idea as fbstring
                   space_left:4,
                   // if it's on heap, this is set to 1
-                  is_on_heap:1,
+                  is_pointer:1,
                   flag1:1,
                   flag2:1,
                   flag3:1;
@@ -35,11 +36,11 @@ typedef union {
 #define an0 __attribute__((nonnull))
 #define an0si an0 static inline
 // query
-an0si int s_is_on_heap(const s *s) { return s->is_on_heap; }
-an0si size_t s_size(const s *s) { return s_is_on_heap(s) ? s->size : 15 - s->space_left; }
-an0si char *s_data(const s *s) { return s_is_on_heap(s) ? (char *)s->ptr : (char *)s->data; }
-an0si int s_empty(const s *s) { return s_is_on_heap(s) ? s->size == 0 : s->space_left == 15; }
-an0si size_t s_capacity(const s *s) { return s_is_on_heap(s) ? ((size_t)1 << s->capacity) - 1 : 15; }
+an0si int s_is_pointer(const s *s) { return s->is_pointer; }
+an0si size_t s_size(const s *s) { return s_is_pointer(s) ? s->size : 15 - s->space_left; }
+an0si char *s_data(const s *s) { return s_is_pointer(s) ? (char *)s->ptr : (char *)s->data; }
+an0si int s_empty(const s *s) { return s_is_pointer(s) ? s->size == 0 : s->space_left == 15; }
+an0si size_t s_capacity(const s *s) { return s_is_pointer(s) ? ((size_t)1 << s->capacity) - 1 : 15; }
 
 // manipulation
 // all of these return their first argument
@@ -62,7 +63,12 @@ an0 s *s_itos(s *, int);
 an0 int s_stoi(const s *);
 an0 s *s_trim(s *, const char *);
 
-an0si s *s_free(s * x) { if (s_is_on_heap(x)) free(s_data(x)); return s_newempty(x); }
+an0si s *s_free(s *x) { if (s_is_pointer(x)) free(s_data(x)); return s_newempty(x); }
+
+an0si int s_cmp(s *restrict a, s *restrict b) {
+  return s_size(a) == s_size(b) ? memcmp(s_data(a), s_data(b), s_size(a)) : s_size(a) > s_size(b);
+}
+
 #undef an0si
 #undef an0
 

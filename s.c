@@ -12,7 +12,7 @@ s *s_newlen(s *x, const void *p, size_t len) {
   if (len > 15) {
     x->capacity = ilog2(len) + 1;
     x->size = len;
-    x->is_on_heap = 1;
+    x->is_pointer = 1;
     x->ptr = malloc((size_t)1 << x->capacity);
     memcpy(x->ptr, p, len);
     x->ptr[len] = 0;
@@ -30,7 +30,7 @@ s *s_new(s *x, const void *p) {
   if (len > 16) {
     x->capacity = ilog2(len) + 1;
     x->size = len - 1;
-    x->is_on_heap = 1;
+    x->is_pointer = 1;
     x->ptr = malloc((size_t)1 << x->capacity);
     memcpy(x->ptr, p, len);
   }
@@ -62,7 +62,7 @@ s *s_cat(s *a, const s *b) {
 s *s_grow(s *x, size_t len) {
   if (len <= s_capacity(x)) return x;
   len = ilog2(len) + 1;
-  if (s_is_on_heap(x))
+  if (s_is_pointer(x))
     x->ptr = realloc(x->ptr, (size_t)1 << len);
   else {
     char buf[16];
@@ -70,7 +70,7 @@ s *s_grow(s *x, size_t len) {
     x->ptr = malloc((size_t)1 << len);
     memcpy(x->ptr, buf, 16);
   }
-  x->is_on_heap = 1;
+  x->is_pointer = 1;
   x->capacity = len;
   return x;
 }
@@ -169,7 +169,7 @@ s *s_trim(s *x, const char *trimset) {
   // don't dirty memory unless it's needed
   if (orig[slen]) orig[slen] = 0;
 
-  if (s_is_on_heap(x)) x->size = slen;
+  if (s_is_pointer(x)) x->size = slen;
   else x->space_left = 15 - slen;
   return x;
 }
