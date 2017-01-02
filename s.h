@@ -50,7 +50,7 @@ an0 s *s_newlen(s *, const void *, size_t);
 // this leaks if the string is too long but it's very handy for short strings
 // "" causes a compile time error if x is not a string literal or too long
 // _Static_assert is a declaration, not an expression.  fizzie came up with this hack
-#define s_small_temporary(x) \
+#define s_tmp(x) \
   ((void)((struct { _Static_assert(sizeof x <= 16, "it's too big"); int dummy; }){1}), \
    s_new(&s_literal_empty(), "" x))
 an0si s *s_newempty(s *x) { *x = s_literal_empty(); return x; }
