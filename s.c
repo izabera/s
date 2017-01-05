@@ -59,6 +59,36 @@ s *s_cat(s *a, const s *b) {
   return a;
 }
 
+s *s_concat(s *string, const s *prefix, const s *suffix) {
+  size_t pres = s_size(prefix),
+         sufs = s_size(suffix),
+         size = s_size(string),
+         capacity = s_capacity(string);
+
+  char *pre = s_data(prefix),
+       *suf = s_data(suffix),
+       *data = s_data(string);
+
+  if (size + pres + sufs <= capacity) {
+    memmove(data + pres, data, size);
+    memcpy(data, pre, pres);
+    memcpy(data + pres + size, suf, sufs+1);
+    string->space_left = 15 - (size + pres + sufs);
+  }
+  else {
+    s tmps = { .space_left = 15 };
+    s_grow(&tmps, size + pres + sufs);
+    char *tmpdata = s_data(&tmps);
+    memcpy(tmpdata + pres, data, size);
+    memcpy(tmpdata, pre, pres);
+    memcpy(tmpdata + pres + size, suf, sufs+1);
+    s_free(string);
+    *string = tmps;
+    string->size = size + pres + sufs;
+  }
+  return string;
+}
+
 s *s_grow(s *x, size_t len) {
   if (len <= s_capacity(x)) return x;
   len = ilog2(len) + 1;

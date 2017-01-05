@@ -77,5 +77,9 @@ int main() {
   string = *s_tmp("  foobarbaz  \n\n");
   s_trim(&string, "\n ");
   printf("%zu <%s>\n", s_size(&string), s_data(&string));
+
+  s prefix = *s_tmp("("), suffix = *s_tmp(")");
+  s_concat(&string, &prefix, &suffix);
+  printf("%s %zu\n", s_data(&string), s_size(&string));
   return 0;
 }

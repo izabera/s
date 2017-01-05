@@ -56,6 +56,7 @@ an0 s *s_newlen(s *, const void *, size_t);
 an0si s *s_newempty(s *x) { *x = s_literal_empty(); return x; }
 an0si s *s_dup(s *dest, const s *src) { return s_newlen(dest, s_data(src), s_size(src)); }
 an0 s *s_cat(s *, const s *);
+an0 s *s_concat(s *, const s *, const s *);
 // grow up to that size
 an0 s *s_grow(s *, size_t);
 // from INT_MIN+1 to INT_MAX
